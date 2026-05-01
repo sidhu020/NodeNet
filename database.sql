@@ -1,0 +1,25 @@
+CREATE DATABASE IF NOT EXISTS lab_network;
+USE lab_network;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    last_seen DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS files (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    parent_id INT DEFAULT NULL,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('file', 'folder') NOT NULL,
+    path VARCHAR(1000) DEFAULT NULL,
+    permission ENUM('private', 'public', 'read_only') DEFAULT 'private',
+    size INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES files(id) ON DELETE CASCADE
+);

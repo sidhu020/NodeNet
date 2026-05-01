@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline CS Lab Network</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="desktop-wallpaper"></div>
+    
+    <div class="mac-window" id="app-window">
+        
+        <div id="app">
+            <!-- Auth View -->
+            <div id="auth-view" class="view active">
+                <div class="auth-container glass">
+                    <div class="auth-tabs">
+                        <button id="tab-login" class="active" onclick="app.switchAuthTab('login')">Login</button>
+                        <button id="tab-register" onclick="app.switchAuthTab('register')">Register</button>
+                    </div>
+                    <div id="login-form" class="auth-form active">
+                        <h2>Welcome Back</h2>
+                        <input type="text" id="login-user" placeholder="Username" autocomplete="off">
+                        <input type="password" id="login-pass" placeholder="Password">
+                        <button class="btn-primary" onclick="app.login()">Login to Lab</button>
+                    </div>
+                    <div id="register-form" class="auth-form">
+                        <h2>Join Network</h2>
+                        <input type="text" id="reg-user" placeholder="Choose Username" autocomplete="off">
+                        <input type="password" id="reg-pass" placeholder="Create Password">
+                        <button class="btn-primary" onclick="app.register()">Create Account</button>
+                    </div>
+                    <div id="auth-msg" class="msg"></div>
+                </div>
+            </div>
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view">
+                <!-- Sidebar -->
+                <aside class="sidebar glass-panel">
+                    <div class="mac-controls window-mac-controls">
+                        <div class="mac-btn close"></div>
+                        <div class="mac-btn minimize"></div>
+                        <div class="mac-btn maximize"></div>
+                    </div>
+                    
+                    <div class="brand">
+                        <div class="logo">⚡ NodeNet</div>
+                        <div class="user-info">@<span id="current-username"></span></div>
+                    </div>
+                    
+                    <div class="sidebar-section-title">Favorites</div>
+                    <nav class="side-nav">
+                        <a href="#" id="nav-my-files" class="active" onclick="app.loadFiles(null)">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> My Files
+                        </a>
+                        <a href="#" id="nav-network" onclick="app.loadPublicFiles()">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> Network Public
+                        </a>
+                    </nav>
+                    
+                    <div class="bottom-panel">
+                        <div class="node-status">
+                            <div class="pulse"></div>
+                            <span id="active-nodes">1</span> Active Node(s)
+                        </div>
+                        <button class="btn-logout" onclick="app.logout()">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Logout
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="main-content">
+                    <!-- File Manager -->
+                    <div id="file-manager" class="manager-view active">
+                        <header class="top-bar glass-panel">
+                            <div class="breadcrumbs" id="breadcrumbs">
+                                <span onclick="app.loadFiles(null)">Root</span>
+                            </div>
+                            <div class="actions">
+                                <div class="search-container">
+                                    <input type="text" id="file-search" placeholder="Search..." onkeyup="app.filterFiles()">
+                                </div>
+                                <button id="btn-create-folder" class="btn-secondary" onclick="app.showCreateModal('folder')">+ Folder</button>
+                                <button id="btn-create-file" class="btn-secondary" onclick="app.showCreateModal('file')">+ File</button>
+                                <button id="btn-download-zip" class="btn-secondary hidden" onclick="app.downloadCurrentFolder()">📦 Zip</button>
+                                
+                                <div class="upload-dropdown-container" id="upload-menu-container">
+                                    <button id="btn-upload" class="btn-primary" onclick="app.toggleUploadMenu()">+ Upload</button>
+                                    <div class="upload-dropdown glass" id="upload-dropdown">
+                                        <label class="dropdown-item">
+                                            📄 Upload Files
+                                            <input type="file" id="manual-file-upload" multiple class="hidden" onchange="app.handleManualUpload(event, false)">
+                                        </label>
+                                        <label class="dropdown-item">
+                                            📁 Upload Folder
+                                            <input type="file" id="manual-folder-upload" webkitdirectory directory class="hidden" onchange="app.handleManualUpload(event, true)">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="file-grid" id="file-grid">
+                            <!-- Items injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Code Editor -->
+                    <div id="editor-view" class="manager-view">
+                        <header class="top-bar glass-panel">
+                            <div class="breadcrumbs">
+                                <button class="btn-back" onclick="app.closeEditor()">← Back</button>
+                                <span id="editor-filename">untitled.txt</span>
+                            </div>
+                            <div class="actions">
+                                <span id="editor-status" class="status-msg"></span>
+                                <select id="editor-permission" class="editor-select" onchange="app.changePermission(this.value)">
+                                    <option value="private">Private</option>
+                                    <option value="public">Public</option>
+                                    <option value="read_only">Read-Only</option>
+                                </select>
+                                <button class="btn-secondary" onclick="app.downloadFile()">⬇ Download</button>
+                                <button class="btn-primary" id="btn-save" onclick="app.saveFile()">Save</button>
+                            </div>
+                        </header>
+                        
+                        <!-- Custom Text Editor -->
+                        <div class="custom-editor-container" id="editor-container">
+                            <div class="line-numbers" id="line-numbers">1</div>
+                            <textarea class="code-textarea" id="code-textarea" wrap="off" spellcheck="false" oninput="app.updateLineNumbers()" onscroll="app.syncScroll()"></textarea>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modals & Overlays -->
+    <div id="drop-overlay" class="drop-overlay glass">
+        <div class="drop-message">
+            <svg style="width:80px;height:80px;color:var(--primary);margin-bottom:1rem;" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.36 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            <h2 style="font-weight: 300;">Drop files or folders to upload</h2>
+            <div id="upload-status" class="upload-status-text"></div>
+        </div>
+    </div>
+    
+    <div id="rename-modal" class="modal-overlay">
+        <div class="modal glass">
+            <h3>Rename</h3>
+            <input type="hidden" id="rename-id">
+            <input type="text" id="rename-name" placeholder="New Name...">
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="app.closeRenameModal()">Cancel</button>
+                <button class="btn-primary" onclick="app.submitRename()">Rename</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="move-modal" class="modal-overlay">
+        <div class="modal glass">
+            <h3>Move To</h3>
+            <input type="hidden" id="move-id">
+            <select id="move-dest">
+                <option value="">Root</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="app.closeMoveModal()">Cancel</button>
+                <button class="btn-primary" onclick="app.submitMove()">Move</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-modal" class="modal-overlay">
+        <div class="modal glass">
+            <h3 id="modal-title">Create Item</h3>
+            <input type="text" id="create-name" placeholder="Name...">
+            <input type="hidden" id="create-type">
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="app.closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="app.createItem()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
